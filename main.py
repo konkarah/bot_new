@@ -15,10 +15,10 @@ def start(update, context):
     update.message.reply_text("""
     The following commands are available:
     
-    /start -> Welcome Message
-    /help -> This message
-    /content -> information about CCTPMIS
-    /contact -> informaion about Available Channels
+    /start -> Menu on what is currently offered
+    /help -> Help on accessing the Bot
+    /content -> Information about CCTPMIS
+    /contact -> https://www.socialprotection.go.ke/
     """)
 
 
@@ -46,6 +46,17 @@ def handle_message(update, context):
         update.message.reply_text(f"You said {update.message.text}")
     else:
         update.message.reply_text("You are not a verified user")
+
+def help_query(update, context):
+    gettgid(update,context)
+    verifyuser(userid)
+    if status == True:
+        update.message.reply_text(help())
+    else:
+        update.message.reply_text("You are not a verified user")
+
+def help():
+    return "To query Programmes type : /programme then Programme Number or ID no\nTo query exceptions type: /exceptions ID NO/ Programme No"
 
 #function to authenticate the default-user
 def authentication():
@@ -84,7 +95,7 @@ def ctovc(pgno):
     mycursor = mydb.cursor()
 
     sql = "SELECT BankName,BranchName,AccountName,Amount FROM table_name WHERE ProgrammeNO = %s OR PrimaryRecipientNationalIDNO = %s"
-    pgno = (pgno, )
+    pgno = (pgno, pgno )
 
     mycursor.execute(sql, pgno)
 
@@ -97,7 +108,8 @@ def ctovc(pgno):
         Amount = x[3]
         return f"BankName is: {bankname}\nBranch Name is: {BranchName} \nAccount Name is: {AccountName}\nPaid in last cycle: {Amount}"
     else:
-        EXCEPTIONS(pgno) 
+        return ("Not in payroll")
+        #EXCEPTIONS(pgno) 
 
 
 #Query the ctovc programme
@@ -122,8 +134,8 @@ def PWSD(pgno):
 
     mycursor = mydb.cursor()
 
-    sql = "SELECT BankName,BranchName,AccountName,Amount FROM PWSD WHERE ProgrammeNO = %s"
-    pgno = (pgno, )
+    sql = "SELECT BankName,BranchName,AccountName,Amount FROM PWSD WHERE ProgrammeNO = %s OR PrimaryRecipientNationalIDNO = %s"
+    pgno = (pgno, pgno )
 
     mycursor.execute(sql, pgno)
 
@@ -136,8 +148,8 @@ def PWSD(pgno):
         Amount = x[3]
         return f"BankName is: {bankname}\nBranch Name is: {BranchName} \nAccount Name is: {AccountName}\nPaid in last cycle: {Amount}"
     else:
-        #return ("Not in payroll")
-        EXCEPTIONS(pgno)
+        return ("Not in payroll")
+        #EXCEPTIONS(pgno)
 
 
 #Query the pwsd programme
@@ -171,8 +183,8 @@ def opct(pgno):
 
     mycursor = mydb.cursor()
 
-    sql = "SELECT BankName,BranchName,AccountName,Amount FROM OPCT WHERE ProgrammeNO = %s"
-    pgno = (pgno, )
+    sql = "SELECT BankName,BranchName,AccountName,Amount FROM OPCT WHERE ProgrammeNO = %s OR PrimaryRecipientNationalIDNO = %s"
+    pgno = (pgno, pgno )
 
     mycursor.execute(sql, pgno)
 
@@ -185,7 +197,8 @@ def opct(pgno):
         Amount = x[3]
         return f"BankName is: {bankname}\nBranch Name is: {BranchName} \nAccount Name is: {AccountName}\nPaid in last cycle: {Amount}"
     else:
-        EXCEPTIONS(pgno)
+        return ("Not in payroll")
+        #EXCEPTIONS(pgno)
 
 #exceptions function
 def EXCEPTIONS(pgno):
@@ -200,8 +213,8 @@ def EXCEPTIONS(pgno):
     ReasonForException = ""
 
     #Without Payment Card
-    WithoutPaymentCard = "SELECT * FROM WithoutPaymentCard WHERE ProgrammeNo =  %s"  
-    WPCpgno = (pgno, )
+    WithoutPaymentCard = "SELECT * FROM WithoutPaymentCard WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s"  
+    WPCpgno = (pgno, pgno)
     mycursor.execute(WithoutPaymentCard, WPCpgno)
     myresult1 = mycursor.fetchall()
 
@@ -212,8 +225,8 @@ def EXCEPTIONS(pgno):
 
    
     #without Bank Account
-    WithoutBankAccount = "SELECT * FROM WithoutBankAccount WHERE ProgrammeNo =  %s" 
-    WBApgno = (pgno, )
+    WithoutBankAccount = "SELECT * FROM WithoutBankAccount WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    WBApgno = (pgno, pgno )
     mycursor.execute(WithoutBankAccount, WBApgno)
     myresult2 = mycursor.fetchall()
 
@@ -222,8 +235,8 @@ def EXCEPTIONS(pgno):
         
 
     #primary recipient IPRS mismatch
-    PRIM = "SELECT * FROM PrimaryRecipientIPRSMismatch WHERE ProgrammeNo =  %s" 
-    PRIMpgno = (pgno, )
+    PRIM = "SELECT * FROM PrimaryRecipientIPRSMismatch WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    PRIMpgno = (pgno, pgno)
     mycursor.execute(PRIM, PRIMpgno)
     myresult3 = mycursor.fetchall()
 
@@ -233,8 +246,8 @@ def EXCEPTIONS(pgno):
     
 
     #primary recipient duplicated within
-    PRDW = "SELECT * FROM PrimaryRecipientduplicatedWithin WHERE ProgrammeNo =  %s" 
-    PRDWpgno = (pgno, )
+    PRDW = "SELECT * FROM PrimaryRecipientduplicatedWithin WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    PRDWpgno = (pgno, pgno )
     mycursor.execute(PRDW, PRDWpgno)
     myresult4 = mycursor.fetchall()
 
@@ -242,8 +255,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Primary Recipient Duplicated Within \n"
 
     #primary recipient duplicated across
-    PRDA = "SELECT * FROM PrimaryRecipientduplicatedacross WHERE ProgrammeNo =  %s" 
-    PRDApgno = (pgno, )
+    PRDA = "SELECT * FROM PrimaryRecipientduplicatedacross WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    PRDApgno = (pgno, pgno)
     mycursor.execute(PRDA, PRDApgno)
     myresult5 = mycursor.fetchall()
 
@@ -251,8 +264,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Primary Recipient Duplicated Across \n"
 
     #Primary Recipient Missing or Ineligible
-    PRMOI = "SELECT * FROM PrimaryRecipientMissingOrIneligible WHERE ProgrammeNo =  %s" 
-    PRMOIpgno = (pgno, )
+    PRMOI = "SELECT * FROM PrimaryRecipientMissingOrIneligible WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    PRMOIpgno = (pgno, pgno)
     mycursor.execute(PRMOI, PRMOIpgno)
     myresult6 = mycursor.fetchall()
 
@@ -260,8 +273,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Primary Recipient Missing or Ineligible \n"  
 
     #Secondary Recipient Duplicated Within
-    SRDW = "SELECT * FROM SecondaryRecipientduplicatedWithin WHERE ProgrammeNo =  %s" 
-    SRDWpgno = (pgno, )
+    SRDW = "SELECT * FROM SecondaryRecipientduplicatedWithin WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    SRDWpgno = (pgno, pgno)
     mycursor.execute(SRDW, SRDWpgno)
     myresult7 = mycursor.fetchall()
 
@@ -269,8 +282,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Seconadary recipient duplicated within \n" 
 
     #Secondary Recipient IPRS Mismatch
-    SRIM = "SELECT * FROM SecondaryRecipientIPRSMismatch WHERE ProgrammeNo =  %s" 
-    SRIMpgno = (pgno, )
+    SRIM = "SELECT * FROM SecondaryRecipientIPRSMismatch WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    SRIMpgno = (pgno, pgno)
     mycursor.execute(SRIM, SRIMpgno)
     myresult8 = mycursor.fetchall()
 
@@ -278,8 +291,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Seconadary recipient IPRS Mismatch \n"  
 
     #Secondary Recipient Duplicated Across
-    SRDW = "SELECT * FROM SecondaryRecipientDuplicatedacross WHERE ProgrammeNo =  %s" 
-    SRDWpgno = (pgno, )
+    SRDW = "SELECT * FROM SecondaryRecipientDuplicatedacross WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    SRDWpgno = (pgno, pgno)
     mycursor.execute(SRDW, SRDWpgno)
     myresult9 = mycursor.fetchall()
 
@@ -287,8 +300,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Seconadary recipient duplicated Across \n" 
 
     #SecondaryRecipientMissing
-    SRM = "SELECT * FROM SecondaryRecipientMissing WHERE ProgrammeNo =  %s" 
-    SRMpgno = (pgno, )
+    SRM = "SELECT * FROM SecondaryRecipientMissing WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    SRMpgno = (pgno, pgno)
     mycursor.execute(SRM, SRMpgno)
     myresult10 = mycursor.fetchall()
 
@@ -296,8 +309,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Secondary recipient missing \n" 
 
     #Householdsuspended   
-    HHS = "SELECT * FROM Householdsuspended WHERE ProgrammeNo =  %s" 
-    HHSpgno = (pgno, )
+    HHS = "SELECT * FROM Householdsuspended WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    HHSpgno = (pgno, pgno)
     mycursor.execute(HHS, HHSpgno)
     myresult11 = mycursor.fetchall()
 
@@ -305,8 +318,8 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Household Suspended \n" 
 
     #DormantAccount 
-    DA = "SELECT * FROM DormantAccount WHERE ProgrammeNo =  %s" 
-    DApgno = (pgno, )
+    DA = "SELECT * FROM DormantAccount WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    DApgno = (pgno, pgno)
     mycursor.execute(DA, DApgno)
     myresult12 = mycursor.fetchall()
 
@@ -314,19 +327,21 @@ def EXCEPTIONS(pgno):
         ReasonForException +=  "Dormant Account \n" 
 
     #SuspiciousPayment  
-    SP = "SELECT * FROM SuspiciousPayment WHERE ProgrammeNo =  %s" 
-    SPpgno = (pgno, )
+    SP = "SELECT * FROM SuspiciousPayment WHERE ProgrammeNo =  %s OR PrimaryRecipientIDNO = %s" 
+    SPpgno = (pgno, pgno)
     mycursor.execute(SP, SPpgno)
     myresult13 = mycursor.fetchall()
 
     if len(myresult13) >= 1:
         ReasonForException +=  "Suspicious Payment \n"  
 
-    if ReasonForException != None:
-        return ReasonForException
-    else:
-        return ("Most likely not in programme. Use CCTPMIS to reconfirm the beneficiary")
 
+    
+    if len(ReasonForException) == 0:
+        res = "Most likely not in programme. Use CCTPMIS to reconfirm the beneficiary"
+        return res
+
+    return ReasonForException
 
 #Query the exceptions table 
 def query_exceptions(update, context):
@@ -424,7 +439,7 @@ updater = telegram.ext.Updater(TOKEN, use_context = True)
 disp = updater.dispatcher
 
 disp.add_handler(telegram.ext.CommandHandler("start", start))
-disp.add_handler(telegram.ext.CommandHandler("help", help))
+disp.add_handler(telegram.ext.CommandHandler("help", help_query))
 disp.add_handler(telegram.ext.CommandHandler("content", content))
 disp.add_handler(telegram.ext.CommandHandler("contact", contact))
 #CTOVC query
