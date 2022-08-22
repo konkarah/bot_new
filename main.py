@@ -1,3 +1,4 @@
+#import necessary modules
 import telegram.ext
 import mysql.connector
 import requests
@@ -5,7 +6,7 @@ import jwt
 import json
 from jwt.exceptions import ExpiredSignatureError
 
-
+#Bot Token
 TOKEN = '5448315119:AAGL4EwgtAH74p2znpj8_nIbLUhbgBjLgXk'
 
 def start(update, context):
